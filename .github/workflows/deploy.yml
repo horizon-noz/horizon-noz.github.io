@@ -2,15 +2,13 @@ name: Deploy SvelteKit to GitHub Pages
 
 on:
   push:
-    branches: ['main'] # Ubah ke 'master' jika branch utama kamu bernama master
+    branches: ['main'] # Pastikan nama branch kamu benar (main atau master)
 
-# Mengatur permission yang dibutuhkan agar Actions bisa menulis ke GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Mencegah penumpukan deployment yang berjalan bersamaan
 concurrency:
   group: 'pages'
   cancel-in-progress: true
@@ -22,22 +20,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # Menggunakan Bun karena kamu install via Bun di lokal
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '20' # Menggunakan Node.js versi 20
-          cache: 'npm'
+          bun-version: latest
 
+      # Install dependencies menggunakan Bun
       - name: Install Dependencies
-        run: npm install
+        run: bun install
 
+      # Build project menggunakan Bun
       - name: Build Project
-        run: npm run build
+        run: bun run build
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # SvelteKit static adapter menyimpan hasil build di folder ini
+          path: './dist' # Ubah ke './dist' jika kamu pakai murni Vite (bukan SvelteKit)
 
   deploy:
     needs: build
