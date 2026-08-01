@@ -43,12 +43,6 @@
 				<span class="text-xl font-bold tracking-tight text-slate-900"> Horizon Studio </span>
 			</a>
 
-			<div class="hidden space-x-8 font-medium text-slate-600 md:flex">
-				<a href="#layanan" class="transition hover:text-blue-600">Layanan</a>
-				<a href="#portofolio" class="transition hover:text-blue-600">Portofolio</a>
-				<a href="#tentang" class="transition hover:text-blue-600">Tentang Kami</a>
-			</div>
-
 			<!-- Tombol WhatsApp Navbar -->
 			<a href={waLink} target="_blank" rel="noopener noreferrer" class="hidden items-center gap-2 rounded-full bg-green-500 px-5 py-2.5 font-medium text-white shadow-lg shadow-green-200/50 transition hover:bg-green-600 md:flex">
 				<!-- SVG Icon WhatsApp -->
