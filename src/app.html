@@ -9,4 +9,18 @@
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
+	<script>
+	(() => {
+		const saved = localStorage.getItem('theme');
+
+		const dark =
+			saved === 'dark' ||
+			(!saved &&
+				window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+		if (dark) {
+			document.documentElement.classList.add('dark');
+		}
+	})();
+</script>
 </html>
