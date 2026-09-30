@@ -47,6 +47,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: horizon-noz/HorizonPOS-WebAdmin
+          token: ${{ secrets.HORIZONPOS_TOKEN }}
           path: horizonpos
 
       - name: Setup Node.js
