@@ -1,8 +1,11 @@
-name: Deploy SvelteKit to GitHub Pages
+name: Deploy Website
 
 on:
   push:
-    branches: ['main'] # Pastikan nama branch kamu benar (main atau master)
+    branches:
+      - main
+
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -10,41 +13,85 @@ permissions:
   id-token: write
 
 concurrency:
-  group: 'pages'
+  group: pages
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
+      # ========================================
+      # Main Website
+      # ========================================
+
+      - name: Checkout Main Website
         uses: actions/checkout@v4
 
-      # Menggunakan Bun karena kamu install via Bun di lokal
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      # Install dependencies menggunakan Bun
-      - name: Install Dependencies
+      - name: Install Main Dependencies
         run: bun install
 
-      # Build project menggunakan Bun
-      - name: Build Project
+      - name: Build Main Website
         run: bun run build
 
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
+      # ========================================
+      # HorizonPOS
+      # ========================================
+
+      - name: Checkout HorizonPOS
+        uses: actions/checkout@v4
         with:
-          path: './build' # Ubah ke './dist' jika kamu pakai murni Vite (bukan SvelteKit)
+          repository: horizon-noz/HorizonPOS-WebAdmin
+          path: horizonpos
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: horizonpos/package-lock.json
+
+      - name: Install HorizonPOS Dependencies
+        working-directory: horizonpos
+        run: npm ci
+
+      - name: Build HorizonPOS
+        working-directory: horizonpos
+        run: npm run build
+
+      # ========================================
+      # Merge HorizonPOS into Main Build
+      # ========================================
+
+      - name: Copy HorizonPOS
+        run: |
+          rm -rf build/horizonpos
+          mkdir -p build/horizonpos
+          cp -r horizonpos/dist/. build/horizonpos/
+
+      # ========================================
+      # Upload GitHub Pages Artifact
+      # ========================================
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./build
 
   deploy:
     needs: build
+
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
