@@ -27,7 +27,7 @@
 		},
 		{
 			title: 'Kontak',
-			href: '#kontak',
+			href: '',
 			icon: MessageCircle
 		}
 	];
