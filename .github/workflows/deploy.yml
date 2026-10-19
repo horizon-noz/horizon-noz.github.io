@@ -75,6 +75,18 @@ jobs:
           mkdir -p build/horizonpos
           cp -r horizonpos/dist/. build/horizonpos/
 
+
+      # ========================================
+      # Download Android APK from HorizonPosMobile Release
+      # ========================================
+
+      - name: Download Latest Android APK
+        env:
+          GH_TOKEN: ${{ secrets.HORIZONPOS_TOKEN }}
+        run: |
+          # Download file HorizonPOS.apk langsung dari Release repo private HorizonPosMobile
+          gh release download --repo horizon-noz/HorizonPosMobile --pattern "HorizonPOS.apk" --dir build/horizonpos/ || echo "APK not found in release yet, skipping..."
+
       # ========================================
       # Upload GitHub Pages Artifact
       # ========================================
