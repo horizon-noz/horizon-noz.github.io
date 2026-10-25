@@ -2,9 +2,9 @@ name: Deploy Website
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [main]
+  repository_dispatch:
+    types: [webadmin-updated]     # dipicu dari posWebAdmin
   workflow_dispatch:
 
 permissions:
@@ -19,12 +19,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      # ========================================
-      # Main Website
-      # ========================================
-
+      # ===== Main Website =====
       - name: Checkout Main Website
         uses: actions/checkout@v4
 
@@ -39,14 +35,12 @@ jobs:
       - name: Build Main Website
         run: bun run build
 
-      # ========================================
-      # HorizonPOS
-      # ========================================
-
-      - name: Checkout HorizonPOS
+      # ===== HorizonPOS WebAdmin =====
+      - name: Checkout posWebAdmin
         uses: actions/checkout@v4
         with:
-          repository: horizon-noz/HorizonPOS-WebAdmin
+          repository: khikyfprathama/HorizonPOS-WebAdmin
+          ref: main
           token: ${{ secrets.HORIZONPOS_TOKEN }}
           path: horizonpos
 
@@ -57,39 +51,22 @@ jobs:
           cache: npm
           cache-dependency-path: horizonpos/package-lock.json
 
-      - name: Install HorizonPOS Dependencies
+      - name: Install posWebAdmin Dependencies
         working-directory: horizonpos
         run: npm ci
 
-      - name: Build HorizonPOS
+      - name: Build posWebAdmin
         working-directory: horizonpos
         run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      # ========================================
-      # Merge HorizonPOS into Main Build
-      # ========================================
-
-      - name: Copy HorizonPOS
+      # ===== Gabungkan =====
+      - name: Copy posWebAdmin into main build
         run: |
           rm -rf build/horizonpos
           mkdir -p build/horizonpos
           cp -r horizonpos/dist/. build/horizonpos/
-
-
-      # ========================================
-      # Download Android APK from HorizonPosMobile Release
-      # ========================================
-
-      - name: Download Latest Android APK
-        env:
-          GH_TOKEN: ${{ secrets.HORIZONPOS_TOKEN }}
-        run: |
-          # Download file HorizonPOS.apk langsung dari Release repo private HorizonPosMobile
-          gh release download --repo horizon-noz/HorizonPosMobile --pattern "HorizonPOS.apk" --dir build/horizonpos/ || echo "APK not found in release yet, skipping..."
-
-      # ========================================
-      # Upload GitHub Pages Artifact
-      # ========================================
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v4
@@ -98,13 +75,10 @@ jobs:
 
   deploy:
     needs: build
-
     runs-on: ubuntu-latest
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
