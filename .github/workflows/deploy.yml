@@ -58,8 +58,6 @@ jobs:
       - name: Build posWebAdmin
         working-directory: horizonpos
         run: npm run build
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       # ===== Gabungkan =====
       - name: Copy posWebAdmin into main build
